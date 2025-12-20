@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QMainWindow, QTabWidget
+from PyQt6.QtWidgets import QMainWindow, QTabWidget, QMessageBox
 from Database.match_logic import MatchEngine
 from Display.ControlBoard.score_tab import ScoreTab
 from Display.ControlBoard.displays_tab import DisplaysTab
@@ -12,7 +12,6 @@ class ControlBoard(QMainWindow):
         self.setFixedSize(500, 750)
 
         self.tabs = QTabWidget()
-        
         self.score_tab = ScoreTab(self.engine, self.sync, self.trigger_winner, self.trigger_standby, self.trigger_live)
         self.displays_tab = DisplaysTab(self.display)
         
@@ -20,6 +19,19 @@ class ControlBoard(QMainWindow):
         self.tabs.addTab(self.displays_tab, "Screen")
         self.setCentralWidget(self.tabs)
         self.sync()
+
+    # V01.03-IL: Exit Confirmation
+    def closeEvent(self, event):
+        reply = QMessageBox.question(self, 'Confirm Exit', 
+            "Are you sure you want to close the controller?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, 
+            QMessageBox.StandardButton.No)
+
+        if reply == QMessageBox.StandardButton.Yes:
+            self.display.close() # Close the audience screen too
+            event.accept()
+        else:
+            event.ignore()
 
     def trigger_live(self):
         self.display.set_view(0)
@@ -34,8 +46,8 @@ class ControlBoard(QMainWindow):
 
     def trigger_standby(self):
         self.engine.reset()
-        self.score_tab.p1_in.setText("DANIEL")
-        self.score_tab.p2_in.setText("GUEST")
+        self.score_tab.p1_in.clear()
+        self.score_tab.p2_in.clear()
         self.score_tab.update_game_labels()
         self.display.set_view(2)
         self.score_tab.prep_btn.hide()
@@ -44,7 +56,6 @@ class ControlBoard(QMainWindow):
         self.sync()
 
     def sync(self):
-        # Syncing staged names/limits from the engine to the audience view
         self.display.update_match(
             self.engine.p1_name, self.engine.p2_name,
             self.engine.s1, self.engine.s2, self.engine.g1, self.engine.g2,
