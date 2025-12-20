@@ -1,0 +1,16 @@
+{
+    "players": [
+        {
+            "first": "DANIEL",
+            "last": "PETREAN"
+        },
+        {
+            "first": "GUEST",
+            "last": "PLAYER"
+        }
+    ],
+    "settings": {
+        "game_mode": 21,
+        "theme_color": "#7B2CBF"
+    }
+}
