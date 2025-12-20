@@ -13,7 +13,6 @@ class ControlBoard(QMainWindow):
 
         self.tabs = QTabWidget()
         
-        # Initialize Tabs - Added 'trigger_live' callback
         self.score_tab = ScoreTab(self.engine, self.sync, self.trigger_winner, self.trigger_standby, self.trigger_live)
         self.displays_tab = DisplaysTab(self.display)
         
@@ -23,42 +22,31 @@ class ControlBoard(QMainWindow):
         self.sync()
 
     def trigger_live(self):
-        """Switches audience to Scoreboard and shows control buttons."""
         self.display.set_view(0)
-        self.score_tab.score_controls.show()
-        self.score_tab.start_match_btn.hide()
-        self.score_tab.prep_match_btn.hide()
+        self.score_tab.score_widget.show()
+        self.score_tab.start_btn.hide()
+        self.score_tab.prep_btn.hide()
         self.sync()
 
-    def trigger_winner(self):
-        """Switches audience to Winner Screen."""
-        winner = self.score_tab.p1_in.text() if self.engine.g1 > self.engine.g2 else self.score_tab.p2_in.text()
-        self.display.show_winner(winner)
+    def trigger_winner(self, is_game_winner=False):
+        winner = self.score_tab.p1_in.text() if self.engine.s1 > self.engine.s2 or self.engine.g1 > self.engine.g2 else self.score_tab.p2_in.text()
+        self.display.show_winner(winner, is_game_winner)
 
     def trigger_standby(self):
-        """Switches audience to Standby and resets inputs for new match."""
         self.engine.reset()
-        self.score_tab.p1_in.clear()
-        self.score_tab.p2_in.clear()
-        self.score_tab.p1_in.setPlaceholderText("Enter Player 1 Name")
-        self.score_tab.p2_in.setPlaceholderText("Enter Player 2 Name")
-        
-        self.display.set_view(2) # Show Standby
-        self.score_tab.prep_match_btn.hide()
-        self.score_tab.start_match_btn.show()
-        self.score_tab.score_controls.hide()
+        self.score_tab.p1_in.setText("DANIEL")
+        self.score_tab.p2_in.setText("GUEST")
+        self.score_tab.update_game_labels()
+        self.display.set_view(2)
+        self.score_tab.prep_btn.hide()
+        self.score_tab.start_btn.show()
+        self.score_tab.score_widget.hide()
         self.sync()
 
     def sync(self):
-        # Prevent crash if match_select is empty or non-integer
-        try:
-            target = int(self.score_tab.match_select.currentText())
-        except ValueError:
-            target = 3
-            
+        # Syncing staged names/limits from the engine to the audience view
         self.display.update_match(
-            self.score_tab.p1_in.text() or "TBD", 
-            self.score_tab.p2_in.text() or "TBD",
+            self.engine.p1_name, self.engine.p2_name,
             self.engine.s1, self.engine.s2, self.engine.g1, self.engine.g2,
-            target, self.engine.server
+            self.engine.match_limit, self.engine.server
         )
