@@ -16,6 +16,17 @@ class WelcomeView(QWidget):
         layout.addStretch()
         self.setLayout(layout)
 
+class StandbyView(QWidget):
+    def __init__(self):
+        super().__init__()
+        layout = QVBoxLayout()
+        label = QLabel("MATCH STARTING SOON")
+        label.setStyleSheet("color: #7B2CBF; font-size: 60pt; font-weight: bold;")
+        layout.addStretch()
+        layout.addWidget(label, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addStretch()
+        self.setLayout(layout)
+
 class ScoreboardView(QWidget):
     def __init__(self):
         super().__init__()
@@ -40,7 +51,7 @@ class WinnerView(QWidget):
     def __init__(self):
         super().__init__()
         layout = QVBoxLayout()
-        self.title = QLabel("MATCH WINNER") # 11/21 pts
+        self.title = QLabel("MATCH WINNER")
         self.title.setStyleSheet("color: #FFD700; font-size: 40pt; font-weight: bold;")
         self.name = QLabel("PLAYER")
         self.name.setStyleSheet("color: white; font-size: 100pt; font-weight: bold;")

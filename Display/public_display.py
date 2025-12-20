@@ -11,20 +11,21 @@ class PublicDisplay(QWidget):
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         
         self.stack = QStackedWidget()
-        self.view_score = ScoreboardView()
-        self.view_winner = WinnerView()
-        self.view_standby = StandbyView()
-        self.view_welcome = WelcomeView()
+        self.view_score = ScoreboardView()   # Index 0
+        self.view_winner = WinnerView()      # Index 1
+        self.view_standby = StandbyView()    # Index 2
+        self.view_welcome = WelcomeView()    # Index 3
         
-        self.stack.addWidget(self.view_score)   # 0
-        self.stack.addWidget(self.view_winner)  # 1
-        self.stack.addWidget(self.view_standby) # 2
-        self.stack.addWidget(self.view_welcome) # 3
+        self.stack.addWidget(self.view_score)
+        self.stack.addWidget(self.view_winner)
+        self.stack.addWidget(self.view_standby)
+        self.stack.addWidget(self.view_welcome)
         
         layout = QVBoxLayout(); layout.addWidget(self.stack); self.setLayout(layout)
         self.stack.setCurrentIndex(3) # Start on Welcome Screen
 
-    def set_view(self, index): self.stack.setCurrentIndex(index)
+    def set_view(self, index):
+        self.stack.setCurrentIndex(index)
 
     def update_match(self, f1, f2, s1, s2, g1, g2, target, server):
         v = self.view_score
