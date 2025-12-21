@@ -20,25 +20,17 @@ class ControlBoard(QMainWindow):
         self.setCentralWidget(self.tabs)
         self.sync()
 
-    # V01.03-IL: Exit Confirmation
     def closeEvent(self, event):
         reply = QMessageBox.question(self, 'Confirm Exit', 
             "Are you sure you want to close the controller?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, 
             QMessageBox.StandardButton.No)
-
         if reply == QMessageBox.StandardButton.Yes:
-            self.display.close() # Close the audience screen too
-            event.accept()
-        else:
-            event.ignore()
+            self.display.close(); event.accept()
+        else: event.ignore()
 
     def trigger_live(self):
-        self.display.set_view(0)
-        self.score_tab.score_widget.show()
-        self.score_tab.start_btn.hide()
-        self.score_tab.prep_btn.hide()
-        self.sync()
+        self.display.set_view(0); self.sync()
 
     def trigger_winner(self, is_game_winner=False):
         winner = self.score_tab.p1_in.text() if self.engine.s1 > self.engine.s2 or self.engine.g1 > self.engine.g2 else self.score_tab.p2_in.text()
@@ -46,11 +38,14 @@ class ControlBoard(QMainWindow):
 
     def trigger_standby(self):
         self.engine.reset()
+        self.score_tab.match_active = False # LOCK SCORING
+        self.score_tab.score_widget.setEnabled(False)
         self.score_tab.p1_in.clear()
         self.score_tab.p2_in.clear()
         self.score_tab.update_game_labels()
         self.display.set_view(2)
         self.score_tab.prep_btn.hide()
+        self.score_tab.start_btn.setText("START MATCH")
         self.score_tab.start_btn.show()
         self.score_tab.score_widget.hide()
         self.sync()
