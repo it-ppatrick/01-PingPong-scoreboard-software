@@ -2,15 +2,13 @@ class MatchEngine:
     def __init__(self):
         self.s1, self.s2 = 0, 0
         self.g1, self.g2 = 0, 0
-        self.server = 1 # 1 or 2
-        
-        # Staged Data
+        self.server = 1
+        self.points_in_serve = 0 # Tracked for 5-point rotation
         self.p1_name, self.p2_name = "DANIEL", "GUEST"
         self.pts_limit = 21
         self.match_limit = 3
 
     def swap_data(self):
-        """Standard swap for internal logic."""
         self.s1, self.s2 = self.s2, self.s1
         self.g1, self.g2 = self.g2, self.g1
         self.p1_name, self.p2_name = self.p2_name, self.p1_name
@@ -19,3 +17,4 @@ class MatchEngine:
     def reset(self):
         self.s1, self.s2, self.g1, self.g2 = 0, 0, 0, 0
         self.server = 1
+        self.points_in_serve = 0

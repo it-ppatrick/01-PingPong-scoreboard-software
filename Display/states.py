@@ -27,23 +27,17 @@ class ScoreboardView(QWidget):
         super().__init__()
         layout = QVBoxLayout()
         top = QHBoxLayout()
-        
-        # Names with Ball Indicators
-        self.p1_container = QVBoxLayout()
         self.p1_name = QLabel(); self.p1_name.setObjectName("NameBox")
-        self.p1_ball = QLabel("⚪"); self.p1_ball.setStyleSheet("font-size: 30pt; color: yellow;")
+        self.p1_ball = QLabel("🎾"); self.p1_ball.setStyleSheet("font-size: 30pt; color: yellow;")
         self.p1_ball.hide()
-        self.p1_container.addWidget(self.p1_name); self.p1_container.addWidget(self.p1_ball, alignment=Qt.AlignmentFlag.AlignLeft)
+        p1_v = QVBoxLayout(); p1_v.addWidget(self.p1_name); p1_v.addWidget(self.p1_ball, alignment=Qt.AlignmentFlag.AlignLeft)
         
-        self.p2_container = QVBoxLayout()
         self.p2_name = QLabel(); self.p2_name.setObjectName("NameBox")
-        self.p2_ball = QLabel("⚪"); self.p2_ball.setStyleSheet("font-size: 30pt; color: yellow;")
+        self.p2_ball = QLabel("🎾"); self.p2_ball.setStyleSheet("font-size: 30pt; color: yellow;")
         self.p2_ball.hide()
-        self.p2_container.addWidget(self.p2_name); self.p2_container.addWidget(self.p2_ball, alignment=Qt.AlignmentFlag.AlignRight)
+        p2_v = QVBoxLayout(); p2_v.addWidget(self.p2_name); p2_v.addWidget(self.p2_ball, alignment=Qt.AlignmentFlag.AlignRight)
 
-        top.addLayout(self.p1_container)
-        top.addStretch()
-        top.addLayout(self.p2_container)
+        top.addLayout(p1_v); top.addStretch(); top.addLayout(p2_v)
 
         score_v = QVBoxLayout()
         self.ot_label = QLabel("OVERTIME")
@@ -61,34 +55,28 @@ class ScoreboardView(QWidget):
 class WinnerView(QWidget):
     def __init__(self):
         super().__init__()
-        self.layout = QVBoxLayout()
-        
-        # Trophy Row for Game Winners
+        self.v_layout = QVBoxLayout()
         self.trophy_label = QLabel("🏆  🏆  🏆")
         self.trophy_label.setStyleSheet("font-size: 80pt;")
         self.trophy_label.hide()
-
         self.title = QLabel("MATCH WINNER")
-        self.title.setStyleSheet("color: #FFD700; font-size: 40pt; font-weight: bold;")
-        
+        self.title.setStyleSheet("color: #C0C0C0; font-size: 40pt; font-weight: bold;")
         self.name = QLabel("PLAYER")
         self.name.setStyleSheet("color: white; font-size: 110pt; font-weight: bold;")
-        
-        self.layout.addStretch()
-        self.layout.addWidget(self.trophy_label, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.layout.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.layout.addWidget(self.name, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.layout.addStretch()
-        self.setLayout(self.layout)
+        self.v_layout.addStretch()
+        self.v_layout.addWidget(self.trophy_label, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.v_layout.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.v_layout.addWidget(self.name, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.v_layout.addStretch(); self.setLayout(self.v_layout)
 
     def set_mode(self, is_game_winner):
         if is_game_winner:
             self.title.setText("🏆 GAME CHAMPION 🏆")
-            self.title.setStyleSheet("color: #FFD700; font-size: 60pt; font-weight: bold; text-shadow: 2px 2px #000;")
+            self.title.setStyleSheet("color: #FFD700; font-size: 60pt; font-weight: bold;")
             self.trophy_label.show()
-            self.setStyleSheet("background-color: #1a1a1a; border: 10px solid #FFD700;") # Added golden border
+            self.setStyleSheet("background-color: #1a1a1a; border: 10px solid #FFD700;")
         else:
             self.title.setText("MATCH WINNER")
-            self.title.setStyleSheet("color: #C0C0C0; font-size: 40pt; font-weight: bold;") # Silver for matches
+            self.title.setStyleSheet("color: #C0C0C0; font-size: 40pt; font-weight: bold;")
             self.trophy_label.hide()
             self.setStyleSheet("background-color: #0a0a0a; border: none;")

@@ -10,8 +10,9 @@ class LiveStatusMonitor(QWidget):
         self.status_lbl.setStyleSheet("""
             background-color: #7B2CBF; 
             color: white; 
+            font-size: 12pt;
             font-weight: bold; 
-            padding: 5px; 
+            padding: 8px; 
             border-radius: 5px;
         """)
         layout.addWidget(self.status_lbl)
@@ -22,7 +23,8 @@ class LiveStatusMonitor(QWidget):
         self.status_lbl.setStyleSheet(f"""
             background-color: {color}; 
             color: white; 
+            font-size: 12pt;
             font-weight: bold; 
-            padding: 5px; 
+            padding: 8px; 
             border-radius: 5px;
         """)
