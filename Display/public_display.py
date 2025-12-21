@@ -29,13 +29,10 @@ class PublicDisplay(QWidget):
         v.p1_name.setText(f1.upper()); v.p2_name.setText(f2.upper())
         v.score_label.setText(f"{s1} - {s2}")
         v.game_wins.setText(f"Games: {g1+g2} / {target}")
-
-        # Overtime Detection (11pt game: 10-10, 21pt game: 20-20)
-        limit = 11 if "11" in v.game_wins.text() else 21 # Simple detection for now
-        if s1 >= limit-1 and s2 >= limit-1:
-            v.ot_label.show()
-        else:
-            v.ot_label.hide()
+        
+        # Show ball only for the server
+        v.p1_ball.setVisible(server == 1)
+        v.p2_ball.setVisible(server == 2)
 
     def show_winner(self, name, is_game_winner=False):
         self.view_winner.set_mode(is_game_winner)

@@ -27,11 +27,23 @@ class ScoreboardView(QWidget):
         super().__init__()
         layout = QVBoxLayout()
         top = QHBoxLayout()
+        
+        # Names with Ball Indicators
+        self.p1_container = QVBoxLayout()
         self.p1_name = QLabel(); self.p1_name.setObjectName("NameBox")
+        self.p1_ball = QLabel("⚪"); self.p1_ball.setStyleSheet("font-size: 30pt; color: yellow;")
+        self.p1_ball.hide()
+        self.p1_container.addWidget(self.p1_name); self.p1_container.addWidget(self.p1_ball, alignment=Qt.AlignmentFlag.AlignLeft)
+        
+        self.p2_container = QVBoxLayout()
         self.p2_name = QLabel(); self.p2_name.setObjectName("NameBox")
-        top.addWidget(self.p1_name, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.p2_ball = QLabel("⚪"); self.p2_ball.setStyleSheet("font-size: 30pt; color: yellow;")
+        self.p2_ball.hide()
+        self.p2_container.addWidget(self.p2_name); self.p2_container.addWidget(self.p2_ball, alignment=Qt.AlignmentFlag.AlignRight)
+
+        top.addLayout(self.p1_container)
         top.addStretch()
-        top.addWidget(self.p2_name, alignment=Qt.AlignmentFlag.AlignRight)
+        top.addLayout(self.p2_container)
 
         score_v = QVBoxLayout()
         self.ot_label = QLabel("OVERTIME")
