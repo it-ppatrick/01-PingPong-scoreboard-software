@@ -2,38 +2,24 @@ from ControlBoard.SettingsModule.apply_settings_action import ApplySettingsActio
 
 class SettingsManager:
     def __init__(self, engine, sync_callback):
-        """
-        Manages the transition of data from the UI to the Logic Engine.
-        engine: The MatchEngine instance.
-        sync_callback: The function that updates the Audience UI.
-        """
         self.engine = engine
         self.sync_callback = sync_callback
-        # We keep a reference to the action class for organizational logic
-        self.apply_action = None 
 
     def apply_from_revamp(self, ui):
-        """
-        Maps the inputs from the Revamped UI to the MatchEngine.
-        This follows the 'Best of' and 'Points' logic from your design.
-        """
-        # 1. Update Player Names
+        """Reads Radio Buttons and LineEdits to update the Engine."""
+        # Names
         self.engine.p1_name = ui.p1_input.text().upper() or "PLAYER 1"
         self.engine.p2_name = ui.p2_input.text().upper() or "PLAYER 2"
         
-        # 2. Update Points per Set (Radio Button Logic)
-        if ui.pts_11.isChecked():
-            self.engine.pts_limit = 11
-        else:
-            self.engine.pts_limit = 21
+        # Points Logic
+        self.engine.pts_limit = 11 if ui.pts_11.isChecked() else 21
             
-        # 3. Update Series Length (Match Format Logic)
-        if ui.best_1.isChecked():
-            self.engine.match_limit = 1
-        elif ui.best_3.isChecked():
-            self.engine.match_limit = 3
-        elif ui.best_5.isChecked():
-            self.engine.match_limit = 5
+        # Series Logic
+        if ui.best_1.isChecked(): self.engine.match_limit = 1
+        elif ui.best_3.isChecked(): self.engine.match_limit = 3
+        elif ui.best_5.isChecked(): self.engine.match_limit = 5
+            
+        self.sync_callback()
             
         # 4. Trigger the UI Refresh
         self.sync_callback()

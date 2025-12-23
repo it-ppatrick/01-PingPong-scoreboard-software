@@ -1,15 +1,20 @@
-from GUI_Design.score_deck_ui import ScoreDeckUI
 from ControlBoard.ScoreModule.score_actions import ScoreActions
 
 class ScoreManager:
     def __init__(self, engine, sync_callback, win_callback):
-        self.ui = ScoreDeckUI()
-        self.actions = ScoreActions(engine, self.ui, sync_callback, win_callback)
+        """
+        Manages the Scoring Module.
+        Note: We no longer pass self.ui to ScoreActions because the Hub 
+        now handles the UI-to-Logic connection.
+        """
+        self.match_engine = engine
         
-        self.ui.p1_plus.clicked.connect(lambda: self.actions.add_point(1))
-        self.ui.p2_plus.clicked.connect(lambda: self.actions.add_point(2))
-        self.ui.p1_minus.clicked.connect(lambda: self.actions.undo_point(1))
-        self.ui.p2_minus.clicked.connect(lambda: self.actions.undo_point(2))
+        # FIXED: Removed 'self.ui' from the arguments
+        self.actions = ScoreActions(engine, sync_callback, win_callback)
 
     def get_widget(self):
-        return self.ui
+        """
+        Legacy support: In the revamp, the Hub owns the UI, 
+        so this returns None or a placeholder.
+        """
+        return None
