@@ -1,14 +1,20 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
                              QLabel, QStackedWidget, QLineEdit, QRadioButton, 
-                             QListWidget, QButtonGroup, QFrame)
+                             QListWidget, QButtonGroup, QFrame, QMessageBox)
 from PyQt6.QtCore import Qt, QTimer
 
 class ControlBoardUI(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Control Board - V02.20")
+        self.setWindowTitle("Table Tennis Control - V02.20")
         self.setMinimumSize(450, 650)
         self.setStyleSheet("background-color: #F5F5F5;")
+        
+        # Color Constants for Integrity
+        self.COLOR_P1 = "#2ECC71" # Green
+        self.COLOR_P2 = "#3498DB" # Blue
+        self.COLOR_DISABLED = "#BDC3C7"
+        self.TEXT_DISABLED = "#7F8C8D"
         
         self.main_layout = QVBoxLayout(self)
         
@@ -23,7 +29,6 @@ class ControlBoardUI(QWidget):
             self.nav_layout.addWidget(btn)
         self.main_layout.addLayout(self.nav_layout)
 
-        # --- Stacked Screens ---
         self.stack = QStackedWidget()
         self.scoring_page = self._setup_scoring_page()
         self.settings_page = self._setup_settings_page()
@@ -34,13 +39,11 @@ class ControlBoardUI(QWidget):
         self.stack.addWidget(self.display_page)
         self.main_layout.addWidget(self.stack)
 
-        # --- Status Bar ---
         self.status_bar = QLabel("READY")
         self.status_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.status_bar.setStyleSheet("background-color: #333; color: white; padding: 10px; font-weight: bold;")
         self.main_layout.addWidget(self.status_bar)
 
-        # Tab Switching Logic
         self.btn_main.clicked.connect(lambda: self.stack.setCurrentIndex(0))
         self.btn_settings.clicked.connect(lambda: self.stack.setCurrentIndex(1))
         self.btn_display.clicked.connect(lambda: self.stack.setCurrentIndex(2))
@@ -49,16 +52,16 @@ class ControlBoardUI(QWidget):
         page = QWidget()
         layout = QVBoxLayout(page)
         
-        # Names/Swap
         header = QHBoxLayout()
         self.p1_name_display = QLabel("PLAYER 1")
         self.swap_btn = QPushButton("⇄")
         self.p2_name_display = QLabel("PLAYER 2")
-        for lbl in [self.p1_name_display, self.p2_name_display]:
-            lbl.setStyleSheet("font-size: 14pt; font-weight: bold;")
+        # Issue 1.1: Names start colored to match buttons
+        self.p1_name_display.setStyleSheet(f"font-size: 14pt; font-weight: bold; color: {self.COLOR_P1};")
+        self.p2_name_display.setStyleSheet(f"font-size: 14pt; font-weight: bold; color: {self.COLOR_P2};")
+        
         header.addWidget(self.p1_name_display); header.addWidget(self.swap_btn); header.addWidget(self.p2_name_display)
         
-        # Big Scores
         scores = QHBoxLayout()
         self.s1_huge = QLabel("0"); self.s2_huge = QLabel("0")
         for lbl in [self.s1_huge, self.s2_huge]:
@@ -66,36 +69,29 @@ class ControlBoardUI(QWidget):
             lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         scores.addWidget(self.s1_huge); scores.addWidget(self.s2_huge)
 
-        # Buttons
         grid = QHBoxLayout()
         p1_col = QVBoxLayout()
         self.p1_add = QPushButton("+ 1")
-        self.p1_add.setStyleSheet("background-color: #2ECC71; color: white; height: 80px; font-size: 20pt; border-radius: 10px;")
         self.p1_minus = QPushButton("- 1")
-        self.p1_minus.setStyleSheet("background-color: #2C3E50; color: white; height: 40px; border-radius: 5px;")
         p1_col.addWidget(self.p1_add); p1_col.addWidget(self.p1_minus)
         
         p2_col = QVBoxLayout()
         self.p2_add = QPushButton("+ 1")
-        self.p2_add.setStyleSheet("background-color: #3498DB; color: white; height: 80px; font-size: 20pt; border-radius: 10px;")
         self.p2_minus = QPushButton("- 1")
-        self.p2_minus.setStyleSheet("background-color: #2C3E50; color: white; height: 40px; border-radius: 5px;")
         p2_col.addWidget(self.p2_add); p2_col.addWidget(self.p2_minus)
         
         grid.addLayout(p1_col); grid.addLayout(p2_col)
         layout.addLayout(header); layout.addLayout(scores); layout.addLayout(grid)
         
-        # Start Match Button
+        # Issue 2.2: Start button with outline
         self.match_status_btn = QPushButton("START GAME")
-        self.match_status_btn.setStyleSheet("background-color: #D5D8DC; padding: 15px; font-weight: bold; border-radius: 5px;")
+        self.match_status_btn.setStyleSheet("background-color: #D5D8DC; border: 2px solid #333; padding: 15px; font-weight: bold; border-radius: 5px;")
         layout.addWidget(self.match_status_btn)
 
-        # --- Confirm Winner Popup UI with CANCEL option ---
         self.confirm_widget = QFrame()
         self.confirm_widget.setStyleSheet("background-color: #FDEDEC; border: 2px solid #E74C3C; border-radius: 10px; margin-top: 10px;")
         confirm_layout = QVBoxLayout(self.confirm_widget)
-        
-        msg = QLabel("<b>SET OVER!</b><br>Confirm the winner below:")
+        msg = QLabel("<b>SET OVER!</b>")
         msg.setAlignment(Qt.AlignmentFlag.AlignCenter)
         confirm_layout.addWidget(msg)
 
@@ -104,30 +100,42 @@ class ControlBoardUI(QWidget):
         self.cancel_win_btn.setStyleSheet("background-color: #BDC3C7; color: #333; padding: 10px; font-weight: bold;")
         self.confirm_btn = QPushButton("CONFIRM")
         self.confirm_btn.setStyleSheet("background-color: #E74C3C; color: white; padding: 10px; font-weight: bold;")
-        
-        confirm_btns_layout.addWidget(self.cancel_win_btn)
-        confirm_btns_layout.addWidget(self.confirm_btn)
+        confirm_btns_layout.addWidget(self.cancel_win_btn); confirm_btns_layout.addWidget(self.confirm_btn)
         confirm_layout.addLayout(confirm_btns_layout)
-        
-        self.confirm_widget.hide() 
-        layout.addWidget(self.confirm_widget)
+        self.confirm_widget.hide(); layout.addWidget(self.confirm_widget)
         
         return page
 
-    def set_scoring_enabled(self, enabled):
-        """Standardizes the 'Match Active' visual state."""
-        buttons = [self.p1_add, self.p1_minus, self.p2_add, self.p2_minus]
+    def set_scoring_enabled(self, enabled, p1_color="#2ECC71", p2_color="#3498DB", is_finished=False):
+        """Updated to handle the 'New Game' state."""
+        self.p1_add.setEnabled(enabled)
+        self.p2_add.setEnabled(enabled)
+        self.p1_minus.setEnabled(enabled)
+        self.p2_minus.setEnabled(enabled)
         
-        for btn in buttons:
-            btn.setEnabled(enabled)
-            # Change opacity/color based on state
-            if not enabled:
-                btn.setStyleSheet(btn.styleSheet() + "background-color: #BDC3C7; color: #7F8C8D;")
-            else:
-                # Re-apply the original colors (you might want to store these in variables)
-                if btn == self.p1_add: btn.setStyleSheet("background-color: #2ECC71; color: white; height: 80px; font-size: 20pt; border-radius: 10px;")
-                elif btn == self.p2_add: btn.setStyleSheet("background-color: #3498DB; color: white; height: 80px; font-size: 20pt; border-radius: 10px;")
-                else: btn.setStyleSheet("background-color: #2C3E50; color: white; height: 40px; border-radius: 5px;")
+        if not enabled:
+            # Locked State
+            style = f"background-color: {self.COLOR_DISABLED}; color: {self.TEXT_DISABLED}; height: 80px; font-size: 20pt; border-radius: 10px;"
+            self.p1_add.setStyleSheet(style)
+            self.p2_add.setStyleSheet(style)
+            # Reset names to black or keep muted
+            self.p1_name_display.setStyleSheet(f"font-size: 14pt; font-weight: bold; color: black;")
+            self.p2_name_display.setStyleSheet(f"font-size: 14pt; font-weight: bold; color: black;")
+            
+            self.match_status_btn.setEnabled(True)
+            self.match_status_btn.setText("START GAME")
+            self.match_status_btn.setStyleSheet("background-color: #D5D8DC; border: 2px solid #333; padding: 15px; font-weight: bold;")
+        else:
+            # Active State
+            self.p1_add.setStyleSheet(f"background-color: {p1_color}; color: white; height: 80px; font-size: 20pt; border-radius: 10px;")
+            self.p2_add.setStyleSheet(f"background-color: {p2_color}; color: white; height: 80px; font-size: 20pt; border-radius: 10px;")
+            self.p1_name_display.setStyleSheet(f"font-size: 14pt; font-weight: bold; color: {p1_color};")
+            self.p2_name_display.setStyleSheet(f"font-size: 14pt; font-weight: bold; color: {p2_color};")
+            
+            # Issue 2.1: Deactivate start button
+            self.match_status_btn.setEnabled(False)
+            self.match_status_btn.setText("MATCH IN PROGRESS")
+            self.match_status_btn.setStyleSheet("background-color: #2ECC71; color: white; border: none; padding: 15px; font-weight: bold;")
 
     def _setup_settings_page(self):
         page = QWidget()
@@ -153,8 +161,7 @@ class ControlBoardUI(QWidget):
         
         self.apply_settings_btn = QPushButton("Apply Settings")
         self.apply_settings_btn.setStyleSheet("background-color: #F1C40F; padding: 15px; font-weight: bold;")
-        layout.addWidget(self.apply_settings_btn)
-        layout.addStretch()
+        layout.addWidget(self.apply_settings_btn); layout.addStretch()
         return page
 
     def _setup_display_page(self):
@@ -163,11 +170,9 @@ class ControlBoardUI(QWidget):
         layout.addWidget(QLabel("<b>Available Displays</b>"))
         self.display_list = QListWidget(); self.display_list.addItem("Primary Monitor")
         layout.addWidget(self.display_list)
-        
         self.broadcast_btn = QPushButton("START BROADCAST")
         self.broadcast_btn.setStyleSheet("background-color: #E67E22; color: white; padding: 20px; font-weight: bold;")
-        layout.addWidget(self.broadcast_btn)
-        layout.addStretch()
+        layout.addWidget(self.broadcast_btn); layout.addStretch()
         return page
 
     def flash_status(self, message):

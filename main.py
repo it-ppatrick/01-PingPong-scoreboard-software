@@ -31,6 +31,7 @@ def main():
         'sync': audience.update_display,
         'live': lambda: audience.switch_to(1),
         'standby': lambda: audience.switch_to(0),
+        'swap': audience.swap_sides, # ADD THIS FOR ITEM 5
         'winner': lambda is_game_winner: audience.switch_to(
             2, 
             winner_text=f"CHAMPION: {engine.p1_name if engine.g1 > engine.g2 else engine.p2_name}" 

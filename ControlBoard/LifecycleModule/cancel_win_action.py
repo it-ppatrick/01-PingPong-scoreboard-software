@@ -1,17 +1,23 @@
 class CancelWinAction:
-    def __init__(self, ui, engine, score_actions, sync_callback):
+    def __init__(self, ui, engine, score_actions, triggers, sync_hub_callback):
         self.ui = ui
         self.engine = engine
         self.score_actions = score_actions
-        self.sync_callback = sync_callback
+        self.triggers = triggers
+        self.sync_hub = sync_hub_callback
 
     def execute(self):
-        """Rolls back the last point and re-enables match play."""
-        # Roll back P1 if they were leading, otherwise P2
-        winner = 1 if self.engine.s1 > self.engine.s2 else 2
-        self.engine.undo_point(winner)
-        
-        # Re-activate UI
-        self.ui.confirm_widget.hide()
+        """Reverts point directly and re-activates scoring."""
+        if self.engine.s1 > self.engine.s2:
+            self.engine.s1 = max(0, self.engine.s1 - 1)
+        else:
+            self.engine.s2 = max(0, self.engine.s2 - 1)
+            
         self.score_actions.match_active = True
-        self.sync_callback()
+        self.ui.confirm_widget.hide()
+        
+        # Determine colors for UI re-enable
+        # We'll pass the colors logic from the manager/hub
+        self.sync_hub()
+        self.triggers['sync']()
+        self.ui.flash_status("POINT REVERTED")

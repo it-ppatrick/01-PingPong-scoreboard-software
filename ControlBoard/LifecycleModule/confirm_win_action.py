@@ -1,29 +1,32 @@
 class ConfirmWinAction:
-    def __init__(self, ui, engine, score_actions, trigger_winner, sync_callback):
+    def __init__(self, ui, engine, triggers, sync_hub_callback):
         self.ui = ui
         self.engine = engine
-        self.score_actions = score_actions
-        self.trigger_winner = trigger_winner
-        self.sync_callback = sync_callback
+        self.triggers = triggers
+        self.sync_hub = sync_hub_callback
 
     def execute(self):
-        """Processes the set result and checks for a match winner."""
-        # 1. Update Game Score
-        if self.engine.s1 > self.engine.s2: self.engine.g1 += 1
-        else: self.engine.g2 += 1
-        
-        # 2. Reset points for the next set
-        self.engine.reset_set()
-        self.ui.confirm_widget.hide()
-        
-        # 3. Check if someone won the entire match (e.g., 2 sets out of 3)
-        needed = (self.engine.match_limit // 2) + 1
-        if self.engine.g1 >= needed or self.engine.g2 >= needed:
-            self.trigger_winner(is_game_winner=True) # Full Champion Screen
-            self.ui.prep_btn.show() # Offer button to clear everything for next match
+        """Processes results and forces engine reset on Champion."""
+        if self.engine.s1 > self.engine.s2:
+            self.engine.g1 += 1
         else:
-            self.trigger_winner(is_game_winner=False) # Intermediate Set Winner Screen
-            self.ui.start_btn.setText("START NEXT SET")
-            self.ui.start_btn.show()
+            self.engine.g2 += 1
             
-        self.sync_callback()
+        limit = 2 if self.ui.best_3.isChecked() else 3 if self.ui.best_5.isChecked() else 1
+        
+        if self.engine.g1 >= limit or self.engine.g2 >= limit:
+            winner_name = self.engine.p1_name if self.engine.g1 >= limit else self.engine.p2_name
+            self.ui.flash_status(f"CHAMPION: {winner_name}!")
+            self.triggers['winner'](is_game_winner=True)
+            
+            # Reset values immediately and lock board
+            self.engine.reset_full_match() 
+            self.ui.set_scoring_enabled(False, is_finished=True) 
+        else:
+            self.engine.reset_set()
+            self.triggers['sync']()
+            self.ui.flash_status("SET RECORDED")
+            self.ui.set_scoring_enabled(False) 
+        
+        self.ui.confirm_widget.hide()
+        self.sync_hub() # Refresh the Hub scores

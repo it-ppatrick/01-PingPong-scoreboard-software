@@ -41,3 +41,6 @@ class AudienceManager:
     def show(self):
         """Standard window command."""
         self.ui.show()
+    
+    def swap_sides(self, is_flipped):
+        self.ui.set_visual_flip(is_flipped)
