@@ -5,11 +5,13 @@ class MatchEngine:
         self.s1, self.s2 = 0, 0
         self.g1, self.g2 = 0, 0
         
-        # Initial server of the match
+        # ADD THESE TWO LINES
+        self.p1_name = "PLAYER 1"
+        self.p2_name = "PLAYER 2"
+        
         self.starting_server = 1 
         self.server = 1
-        
-        self.pts_limit = 21 # Default
+        self.pts_limit = 21 
         self.points_per_side = 5
 
     def add_point(self, player):

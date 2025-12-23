@@ -1,25 +1,35 @@
 class ScoreActions:
-    def __init__(self, engine, sync_callback, trigger_win_confirm):
+    def __init__(self, engine, ui, sync_callback, win_callback):
         self.engine = engine
+        self.ui = ui
         self.sync_callback = sync_callback
-        self.trigger_win_confirm = trigger_win_confirm
+        self.win_callback = win_callback 
+        self.match_active = False # Buttons are locked until "Start" is pressed
 
-    def handle_add_point(self, player):
-        """Action: Adds a point and checks for a win state."""
+    def add_point(self, player):
+        """Management: Only allows scoring if match is active."""
+        if not self.match_active:
+            return
+
         self.engine.add_point(player)
         
-        # Check if the logic engine says someone reached the limit
-        if self.engine.check_win():
-            self.trigger_win_confirm()
+        # Check for Win: If engine says someone won, call the Hub's win confirmation
+        # Note: Ensure your MatchEngine has a check_win() method!
+        if self.engine.s1 >= self.engine.pts_limit or self.engine.s2 >= self.engine.pts_limit:
+            if abs(self.engine.s1 - self.engine.s2) >= 2:
+                self.win_callback() 
             
         self.sync_callback()
 
-    def handle_undo_point(self, player):
-        """Action: Reverts the point and the server in one go."""
+    def undo_point(self, player):
+        """Action: Reverts the point and syncs the UI."""
+        if not self.match_active:
+            return
+            
         self.engine.undo_point(player)
         self.sync_callback()
 
-    def handle_manual_swap(self):
+    def manual_swap(self):
         """Action: Forces a ball swap without changing the score."""
         self.engine.manual_server_swap()
         self.sync_callback()
