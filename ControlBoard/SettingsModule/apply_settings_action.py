@@ -1,17 +1,19 @@
 class ApplySettingsAction:
-    def __init__(self, ui, settings_store, sync_callback):
+    def __init__(self, ui, engine, sync_callback):
         self.ui = ui
-        self.store = settings_store
+        self.engine = engine
         self.sync_callback = sync_callback
 
     def execute(self):
-        """Action: Captures UI values and updates the 'Brain'."""
-        p1 = self.ui.p1_input.text()
-        p2 = self.ui.p2_input.text()
-        limit = int(self.ui.pts_limit.currentText())
-        
-        # Update our central store
-        self.store.update_names(p1, p2)
-        self.store.update_limits(limit, 3) # Default Best of 3
-        
-        self.sync_callback() # Tell all screens to update their labels
+        # 1. Update Names
+        self.engine.p1_name = self.ui.p1_input.text() or "PLAYER 1"
+        self.engine.p2_name = self.ui.p2_input.text() or "PLAYER 2"
+
+        # 2. Update Match Limit (Parse "Best of 3" -> 3)
+        selection = self.ui.match_limit_box.currentText()
+        # We take the last character of the string and turn it into an integer
+        self.engine.match_limit = int(selection.split(" ")[-1])
+
+        # 3. Refresh the displays
+        self.sync_callback()
+        print(f"Settings Applied: {self.engine.p1_name} vs {self.engine.p2_name} ({selection})")
