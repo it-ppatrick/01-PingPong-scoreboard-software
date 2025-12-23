@@ -32,7 +32,7 @@ class MainControlBoard(QMainWindow):
         self.refresh_hub_scores(self.is_flipped)
 
     def setup_revamp_connections(self):
-        """Pure Routing: UI events to Action Commands."""
+        """Pure Routing: Connects UI clicks to specialized Managers."""
         def handle_scoring(side, action):
             target = side if not self.is_flipped else (2 if side == 1 else 1)
             self.score_mod.actions.execute(target, action)
@@ -43,11 +43,14 @@ class MainControlBoard(QMainWindow):
         self.ui.p1_minus.clicked.connect(lambda: handle_scoring(1, "undo"))
         self.ui.p2_minus.clicked.connect(lambda: handle_scoring(2, "undo"))
         
-        self.ui.match_status_btn.clicked.connect(self.handle_start_btn)
-        self.ui.confirm_btn.clicked.connect(lambda: self.lifecycle_mod.confirm_win(self.set_match_state))
-        self.ui.cancel_win_btn.clicked.connect(lambda: self.lifecycle_mod.cancel_win(self.is_flipped, self.set_match_state))
-        self.ui.swap_btn.clicked.connect(self.handle_swap_logic)
+        # FIXED CONNECTION: Pass self.set_match_state to the manager
+        self.ui.match_status_btn.clicked.connect(
+            lambda: self.lifecycle_mod.start_flow(self.is_flipped, self.set_match_state)
+        )
         
+        self.ui.confirm_btn.clicked.connect(lambda: self.lifecycle_mod.confirm_act.execute())
+        self.ui.cancel_win_btn.clicked.connect(lambda: self.lifecycle_mod.cancel_act.execute())
+        self.ui.swap_btn.clicked.connect(self.handle_swap_logic)
         self.ui.apply_settings_btn.clicked.connect(self.handle_settings_logic)
         self.ui.broadcast_btn.clicked.connect(self.broadcast_mod.start_broadcast)
 
@@ -76,7 +79,15 @@ class MainControlBoard(QMainWindow):
         self.refresh_hub_scores() 
 
     def set_match_state(self, started):
+        """CRITICAL BRIDGE: Unlocks/Locks the Hub buttons visually."""
         self.match_started = started
+        if started:
+            # Sync colors to flip state
+            p1_col = "#3498DB" if self.is_flipped else "#2ECC71"
+            p2_col = "#2ECC71" if self.is_flipped else "#3498DB"
+            self.ui.set_scoring_enabled(True, p1_col, p2_col)
+        else:
+            self.ui.set_scoring_enabled(False)
 
     def show_win_confirmation(self):
         self.match_started = False
