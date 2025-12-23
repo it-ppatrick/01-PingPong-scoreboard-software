@@ -115,17 +115,19 @@ class ControlBoardUI(QWidget):
         return page
 
     def set_scoring_enabled(self, enabled):
-        self.p1_add.setEnabled(enabled)
-        self.p1_minus.setEnabled(enabled)
-        self.p2_add.setEnabled(enabled)
-        self.p2_minus.setEnabled(enabled)
+        """Standardizes the 'Match Active' visual state."""
+        buttons = [self.p1_add, self.p1_minus, self.p2_add, self.p2_minus]
         
-        if enabled:
-            self.match_status_btn.setText("MATCH IN PROGRESS")
-            self.match_status_btn.setStyleSheet("background-color: #2ECC71; color: white; padding: 15px; font-weight: bold;")
-        else:
-            self.match_status_btn.setText("START GAME")
-            self.match_status_btn.setStyleSheet("background-color: #D5D8DC; color: #333; padding: 15px; font-weight: bold;")
+        for btn in buttons:
+            btn.setEnabled(enabled)
+            # Change opacity/color based on state
+            if not enabled:
+                btn.setStyleSheet(btn.styleSheet() + "background-color: #BDC3C7; color: #7F8C8D;")
+            else:
+                # Re-apply the original colors (you might want to store these in variables)
+                if btn == self.p1_add: btn.setStyleSheet("background-color: #2ECC71; color: white; height: 80px; font-size: 20pt; border-radius: 10px;")
+                elif btn == self.p2_add: btn.setStyleSheet("background-color: #3498DB; color: white; height: 80px; font-size: 20pt; border-radius: 10px;")
+                else: btn.setStyleSheet("background-color: #2C3E50; color: white; height: 40px; border-radius: 5px;")
 
     def _setup_settings_page(self):
         page = QWidget()

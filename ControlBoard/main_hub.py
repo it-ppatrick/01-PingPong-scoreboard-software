@@ -11,9 +11,11 @@ class MainControlBoard(QMainWindow):
         self.setMinimumSize(450, 650)
         self.triggers = triggers 
         
+        # 1. UI Initialization
         self.ui = ControlBoardUI()
         self.setCentralWidget(self.ui)
         
+        # 2. Manager Initialization
         self.score_mod = ScoreManager(engine, triggers['sync'], self.show_win_confirmation)
         self.settings_mod = SettingsManager(engine, triggers['sync'])
         self.lifecycle_mod = LifecycleManager(
@@ -21,15 +23,18 @@ class MainControlBoard(QMainWindow):
             triggers['standby'], triggers['winner'], triggers['sync']
         )
 
+        # 3. Connections & Initial State
         self.setup_revamp_connections()
         self.ui.set_scoring_enabled(False) 
+        self.refresh_hub_scores()
 
     def setup_revamp_connections(self):
-        # Scoring
-        self.ui.p1_add.clicked.connect(lambda: self.score_mod.actions.execute(1, "add"))
-        self.ui.p2_add.clicked.connect(lambda: self.score_mod.actions.execute(2, "add"))
-        self.ui.p1_minus.clicked.connect(lambda: self.score_mod.actions.execute(1, "undo"))
-        self.ui.p2_minus.clicked.connect(lambda: self.score_mod.actions.execute(2, "undo"))
+        """Bridges UI to Logic using the Router pattern."""
+        # Scoring Actions with Local Refresh
+        self.ui.p1_add.clicked.connect(lambda: [self.score_mod.actions.execute(1, "add"), self.refresh_hub_scores()])
+        self.ui.p2_add.clicked.connect(lambda: [self.score_mod.actions.execute(2, "add"), self.refresh_hub_scores()])
+        self.ui.p1_minus.clicked.connect(lambda: [self.score_mod.actions.execute(1, "undo"), self.refresh_hub_scores()])
+        self.ui.p2_minus.clicked.connect(lambda: [self.score_mod.actions.execute(2, "undo"), self.refresh_hub_scores()])
         
         # Match/Set Control
         self.ui.match_status_btn.clicked.connect(self.begin_match_flow)
@@ -41,6 +46,12 @@ class MainControlBoard(QMainWindow):
         self.ui.apply_settings_btn.clicked.connect(self.handle_apply_settings)
         self.ui.broadcast_btn.clicked.connect(self.handle_broadcast)
 
+    def refresh_hub_scores(self):
+        """Updates the big numbers on the Control Board to match the Engine."""
+        engine = self.score_mod.match_engine
+        self.ui.s1_huge.setText(str(engine.s1))
+        self.ui.s2_huge.setText(str(engine.s2))
+
     def begin_match_flow(self):
         self.score_mod.actions.match_active = True
         self.ui.set_scoring_enabled(True)
@@ -51,13 +62,11 @@ class MainControlBoard(QMainWindow):
         """Processes set results and checks if the entire match is finished."""
         engine = self.score_mod.match_engine
         
-        # 1. Update Game Score
         if engine.s1 > engine.s2:
             engine.g1 += 1
         else:
             engine.g2 += 1
             
-        # 2. Check Match Limit (Best of 1, 3, or 5)
         limit = 1
         if self.ui.best_3.isChecked(): limit = 2
         elif self.ui.best_5.isChecked(): limit = 3
@@ -65,28 +74,44 @@ class MainControlBoard(QMainWindow):
         if engine.g1 >= limit or engine.g2 >= limit:
             winner_name = engine.p1_name if engine.g1 >= limit else engine.p2_name
             self.ui.flash_status(f"MATCH OVER: {winner_name} WINS!")
-            self.triggers['winner']() # Final Audience Celebration
-            # Keep UI locked - match is done
+            self.triggers['winner']()
         else:
             engine.reset_set()
             self.triggers['sync']()
             self.ui.flash_status("SET RECORDED - READY FOR NEXT")
         
+        self.refresh_hub_scores()
         self.ui.confirm_widget.hide()
         self.ui.set_scoring_enabled(False) 
 
     def handle_cancel_win(self):
-        self.ui.confirm_widget.hide()
-        self.ui.set_scoring_enabled(True) 
+        """Fixes accidental wins by reverting the point directly."""
+        engine = self.score_mod.match_engine
+        if engine.s1 > engine.s2:
+            engine.s1 = max(0, engine.s1 - 1)
+        else:
+            engine.s2 = max(0, engine.s2 - 1)
+            
         self.score_mod.actions.match_active = True
-        self.ui.flash_status("WIN CANCELLED")
+        self.ui.set_scoring_enabled(True) 
+        self.ui.confirm_widget.hide()
+        
+        self.refresh_hub_scores()
+        self.triggers['sync']()
+        self.ui.flash_status("WIN CANCELLED - POINT REVERTED")
 
     def handle_visual_swap(self):
-        """Swaps labels on the Control Board without affecting the engine."""
+        """Swaps labels on the Control Board."""
         p1 = self.ui.p1_name_display.text()
         p2 = self.ui.p2_name_display.text()
         self.ui.p1_name_display.setText(p2)
         self.ui.p2_name_display.setText(p1)
+        
+        s1 = self.ui.s1_huge.text()
+        s2 = self.ui.s2_huge.text()
+        self.ui.s1_huge.setText(s2)
+        self.ui.s2_huge.setText(s1)
+        
         self.ui.flash_status("SIDES SWAPPED VISUALLY")
 
     def handle_apply_settings(self):
