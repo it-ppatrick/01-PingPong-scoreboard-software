@@ -21,7 +21,7 @@ class MainControlBoard(QMainWindow):
         # 2. Manager Initialization
         self.score_mod = ScoreManager(engine, triggers['sync'], self.show_win_confirmation)
         self.settings_mod = SettingsManager(engine, triggers['sync'])
-        self.broadcast_mod = BroadcastManager(self.ui, triggers)
+        self.broadcast_mod = BroadcastManager(self.ui, engine, triggers)
         self.lifecycle_mod = LifecycleManager(
             engine, self.score_mod.actions, self.ui, triggers, self.refresh_hub_scores
         )
@@ -53,6 +53,7 @@ class MainControlBoard(QMainWindow):
         self.ui.swap_btn.clicked.connect(self.handle_swap_logic)
         self.ui.apply_settings_btn.clicked.connect(self.handle_settings_logic)
         self.ui.broadcast_btn.clicked.connect(self.broadcast_mod.start_broadcast)
+        self.ui.hype_btn.clicked.connect(self.broadcast_mod.broadcast_hype)
 
     def refresh_hub_scores(self, flipped_state=None):
         """Visual Refresh only. state passed from Actions."""

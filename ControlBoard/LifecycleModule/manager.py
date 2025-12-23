@@ -8,6 +8,7 @@ class LifecycleManager:
     def __init__(self, engine, score_actions, ui, triggers, sync_hub_callback):
         self.ui = ui
         # Specialized Actions
+        # --- Inside LifecycleManager.__init__ ---
         self.start_act = StartMatchAction(ui, score_actions, triggers['live'])
         self.confirm_act = ConfirmWinAction(ui, engine, triggers, lambda: sync_hub_callback(None))
         self.cancel_act = CancelWinAction(ui, engine, score_actions, triggers, lambda: sync_hub_callback(None))

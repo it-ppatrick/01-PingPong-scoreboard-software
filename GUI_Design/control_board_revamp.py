@@ -159,6 +159,11 @@ class ControlBoardUI(QWidget):
         self.best_3.setChecked(True)
         layout.addWidget(self.best_1); layout.addWidget(self.best_3); layout.addWidget(self.best_5)
         
+        # ADD THIS BUTTON TO RESOLVE THE ATTRIBUTEERROR
+        self.hype_btn = QPushButton("BROADCAST MATCH DETAILS (HYPE)")
+        self.hype_btn.setStyleSheet("background-color: #E67E22; color: white; padding: 15px; font-weight: bold; margin-top: 10px;")
+        layout.addWidget(self.hype_btn)
+
         self.apply_settings_btn = QPushButton("Apply Settings")
         self.apply_settings_btn.setStyleSheet("background-color: #F1C40F; padding: 15px; font-weight: bold;")
         layout.addWidget(self.apply_settings_btn); layout.addStretch()
